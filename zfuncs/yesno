@@ -1,0 +1,60 @@
+# -*-shell-script-*-
+# Return success/failure to a yes/no question
+# Usage:
+#   yesno [options] prompt
+# Options:
+#     -y <string>  The yes answer, 'y' by default
+#     -n <string>  The no answer, 'n' by default
+#     -d <string>  What to default to, value of -n by default. Set to
+#                    something other than value of -y or -n to force the
+#                    user to answer.
+# Returns:
+#      0   When the user answers affirmatively with exactly the -y
+#            string (case sensitively).
+#      1   Otherwise.
+function yesno () {
+  {
+    local _retval=""
+
+    local -A opts
+    opts=(-y y -n n)
+
+    zparseopts -D -K -A opts -- y: n: d:
+
+    if [[ -z "${opts[-d]}" ]]; then
+      opts[-d]="${opts[-n]}"
+    fi
+
+    local _answer=""
+    local _prompt="$*"
+    local _y="${opts[-y]}"
+    local _n="${opts[-n]}"
+    if [[ "${_y}" == "${opts[-d]}" ]]; then
+      _y="${_y:u}"
+    elif [[ "${_n}" == "${opts[-d]}" ]]; then
+      _n="${_n:u}"
+    fi
+
+    while true; do
+      printf '%s (%s/%s)' "${_prompt}" "${_y}" "${_n}" 1>&2
+      read _answer
+      # vared -p "$* ({$o_yes[2]}/${o_no[2]})" _answer
+      : ${_answer:=${opts[-d]:u}}
+      case ${_answer:u} in
+        "${opts[-y]:u}" )
+          _retval=0 && \
+            break
+          ;;
+        "${opts[-n]:u}" )
+          _retval=1 && \
+            break
+          ;;
+        * )
+          echoerr "Please answer ${opts[-y]} or ${opts[-n]}."
+          ;;
+      esac
+    done
+
+    return ${_retval}
+  }
+}

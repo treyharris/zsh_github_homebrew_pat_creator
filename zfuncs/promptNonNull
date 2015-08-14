@@ -1,0 +1,19 @@
+# -*-shell-script-*-
+# Prompt user for info but don't accept the empty string
+#
+# TODO 2015-02-12: generalize; make a version that will
+#   accept empty, will loop until it gets non-empty, etc.
+function promptNonNull () {
+  # args:
+  #  prompt (string)     User prompt. Append a trailing space if desired.
+  #  variable (varname)  Name of variable in which to store response.
+  local answer="${(P)2}"
+  vared -p "$1" -c answer
+  if [[ -n "${answer}" ]]; then
+    typeset -g "${2}"="${answer}"
+  else
+    echoerr "$0: null response setting $2."
+    return 1
+  fi
+  return 0
+}
