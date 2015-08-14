@@ -1,3 +1,18 @@
+fpath=(zfuncs)
+autoload promptNonNull echoerr
+
+# For GitHub auth
+if [[ -z "${GITHUB_USER}" ]]; then
+  until promptNonNull 'Your GitHub username> ' GITHUB_USER
+  do
+    echoerr 'Try again'
+  done
+fi
+
+export GITHUB_USER
+
+exit 0;
+
 # Need a token for homebrew calls to GitHub.
 function {
   local _homebrew_github_pat_file=~/.homebrew-github-token
@@ -54,9 +69,6 @@ is not a 40-digit hexadecimal? Aborting."
   fi
 
 }
-
-# For GitHub auth
-export GITHUB_USER=treyharris
 
 # brew install hub, see http://hub.github.com/
 if (( $+commands[hub] )) ; then
